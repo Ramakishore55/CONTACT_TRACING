@@ -25,6 +25,8 @@
                     aura:id="gameMode"
                     options="{!v.modes}"
                     placeholder="Select Game Mode"
+                    spinnerActive="true"
+                    
                 />
             </lightning:layoutItem>
             <lightning:layoutItem padding="around-small">

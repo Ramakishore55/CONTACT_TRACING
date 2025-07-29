@@ -54,9 +54,9 @@ trigger ContactTrigger on Contact(after insert, after update, after delete, afte
         when AFTER_UNDELETE {
             ContactTriggerHandler.afterUnDeleteHandler(Trigger.new);
         }
-        when BEFORE_INSERT{
+       /* when BEFORE_INSERT{
             //Call Handler class here.
             ContactTriggerHandler.beforeInsert(Trigger.new);
-        }
+        }*/
     }
 }

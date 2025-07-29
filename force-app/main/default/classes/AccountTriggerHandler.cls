@@ -20,5 +20,33 @@ public class AccountTriggerHandler {
         update accountsToUpdate;
         
     }
+    public static void afterUpdate(List<Account> newaccts,Map<Id,Account> oldMap){
+        //	• Trigger: When an Account name changes
+        // Action: Update related Contacts' "Account Name" field to match
+        //1)
+
+
+        List<Contact> ctsToUpdate = new List<Contact>();
+        set<Id> commonIds = new set<Id>();
+        Map<Id, String> newAccountNames = new Map<Id, String>();
+        for(Account forVar:newaccts){
+            if(forVar.Name!=oldMap.get(forVar.Id).Name){
+                commonIds.add(forVar.Id);
+              // Contact cts= new Contact(AccountId=forVar.Id, LastName=forVar.Name);
+              // ctsToUpdate.add(cts);
+              newAccountNames.put(forVar.Id,forVar.Name);
+            }
+           
+           
+        }
+        ctsToUpdate.addAll([select Id, AccountId,Name,LastName from Contact where AccountId In :commonIds]);
+        for (Contact forVar:ctsToUpdate){
+            String newAccountName = newAccountNames.get(forVar.AccountId);
+            if (forVar.LastName!=newAccountName){
+                forVar.LastName = newAccountName;
+            }
+        }
+        update ctsToUpdate;
+    }
 
 }

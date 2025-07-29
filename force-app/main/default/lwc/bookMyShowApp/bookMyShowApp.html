@@ -1,0 +1,284 @@
+<template>
+    <div class="book-my-show-app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <lightning-icon icon-name="utility:event" size="medium" alternative-text="BookMyShow"></lightning-icon>
+                    BookMyShow
+                </h1>
+                <div class="search-bar">
+                    <lightning-input 
+                        type="search" 
+                        placeholder="Search for movies, events, plays, sports..." 
+                        value={searchTerm}
+                        onchange={handleSearch}>
+                    </lightning-input>
+                </div>
+                <div class="location">
+                    <lightning-icon icon-name="utility:location" size="small"></lightning-icon>
+                    <span>{selectedCity}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Movies Section -->
+            <div if:true={showMoviesList} class="movies-section">
+                <div class="section-header">
+                    <h2>Recommended Movies</h2>
+                    <div class="filters">
+                        <lightning-combobox
+                            name="language"
+                            label="Language"
+                            value={selectedLanguage}
+                            placeholder="All Languages"
+                            options={languageOptions}
+                            onchange={handleLanguageChange}>
+                        </lightning-combobox>
+                        <lightning-combobox
+                            name="genre"
+                            label="Genre"
+                            value={selectedGenre}
+                            placeholder="All Genres"
+                            options={genreOptions}
+                            onchange={handleGenreChange}>
+                        </lightning-combobox>
+                    </div>
+                </div>
+
+                <div class="movies-grid">
+                    <template for:each={filteredMovies} for:item="movie">
+                        <div key={movie.id} class="movie-card" onclick={handleMovieClick} data-movie-id={movie.id}>
+                            <div class="movie-poster">
+                                <img src={movie.poster} alt={movie.title} />
+                                <div class="rating">
+                                    <lightning-icon icon-name="utility:favorite" size="x-small"></lightning-icon>
+                                    <span>{movie.rating}/10</span>
+                                </div>
+                            </div>
+                            <div class="movie-info">
+                                <h3 class="movie-title">{movie.title}</h3>
+                                <p class="movie-genre">{movie.genre}</p>
+                                <div class="movie-languages">
+                                    <template for:each={movie.languages} for:item="lang">
+                                        <span key={lang} class="language-tag">{lang}</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Movie Details -->
+            <div if:true={showMovieDetails} class="movie-details">
+                <div class="movie-banner">
+                    <img src={selectedMovie.banner} alt={selectedMovie.title} class="banner-image" />
+                    <div class="movie-details-content">
+                        <div class="movie-header">
+                            <h1>{selectedMovie.title}</h1>
+                            <div class="movie-meta">
+                                <span class="rating">
+                                    <lightning-icon icon-name="utility:favorite" size="small"></lightning-icon>
+                                    {selectedMovie.rating}/10
+                                </span>
+                                <span class="duration">{selectedMovie.duration}</span>
+                                <span class="genre">{selectedMovie.genre}</span>
+                                <span class="certificate">{selectedMovie.certificate}</span>
+                            </div>
+                            <p class="movie-description">{selectedMovie.description}</p>
+                        </div>
+                        <div class="booking-actions">
+                            <lightning-button 
+                                label="Book Tickets" 
+                                variant="brand" 
+                                class="book-button"
+                                onclick={handleBookTickets}>
+                            </lightning-button>
+                            <lightning-button 
+                                label="Back to Movies" 
+                                variant="neutral" 
+                                onclick={handleBackToMovies}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theater Selection -->
+            <div if:true={showTheaterSelection} class="theater-selection">
+                <div class="selection-header">
+                    <h2>{selectedMovie.title}</h2>
+                    <lightning-button 
+                        label="Back" 
+                        variant="neutral" 
+                        onclick={handleBackToMovieDetails}>
+                    </lightning-button>
+                </div>
+
+                <div class="date-selector">
+                    <h3>Select Date</h3>
+                    <div class="date-tabs">
+                        <template for:each={availableDates} for:item="date">
+                            <button key={date.value} 
+                                    class={date.cssClass} 
+                                    onclick={handleDateSelect} 
+                                    data-date={date.value}>
+                                <div class="date-day">{date.day}</div>
+                                <div class="date-date">{date.date}</div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="theaters-list">
+                    <template for:each={theaters} for:item="theater">
+                        <div key={theater.id} class="theater-card">
+                            <div class="theater-info">
+                                <h4>{theater.name}</h4>
+                                <p class="theater-location">{theater.location}</p>
+                                <div class="theater-amenities">
+                                    <template for:each={theater.amenities} for:item="amenity">
+                                        <span key={amenity} class="amenity-tag">{amenity}</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="show-times">
+                                <template for:each={theater.showTimes} for:item="showTime">
+                                    <button key={showTime.id} 
+                                            class="show-time-btn" 
+                                            onclick={handleShowTimeSelect}
+                                            data-theater-id={theater.id}
+                                            data-showtime-id={showTime.id}>
+                                        <div class="show-time">{showTime.time}</div>
+                                        <div class="show-type">{showTime.type}</div>
+                                        <div class="show-price">₹{showTime.price}</div>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Seat Selection -->
+            <div if:true={showSeatSelection} class="seat-selection">
+                <div class="seat-selection-header">
+                    <h2>Select Seats</h2>
+                    <div class="movie-show-info">
+                        <span>{selectedMovie.title}</span>
+                        <span>{selectedTheater.name}</span>
+                        <span>{selectedShowTime.time}</span>
+                        <span>{selectedDate}</span>
+                    </div>
+                    <lightning-button 
+                        label="Back" 
+                        variant="neutral" 
+                        onclick={handleBackToTheaters}>
+                    </lightning-button>
+                </div>
+
+                <div class="screen-container">
+                    <div class="screen">All eyes this way please!</div>
+                </div>
+
+                <div class="seating-layout">
+                    <template for:each={seatLayout} for:item="row">
+                        <div key={row.rowName} class="seat-row">
+                            <div class="row-label">{row.rowName}</div>
+                            <div class="seats">
+                                <template for:each={row.seats} for:item="seat">
+                                    <button key={seat.id} 
+                                            class={seat.cssClass} 
+                                            onclick={handleSeatSelect}
+                                            data-seat-id={seat.id}
+                                            disabled={seat.isBooked}>
+                                        {seat.number}
+                                    </button>
+                                </template>
+                            </div>
+                            <div class="row-label">{row.rowName}</div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="seat-legend">
+                    <div class="legend-item">
+                        <div class="seat-sample available"></div>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="seat-sample selected"></div>
+                        <span>Selected</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="seat-sample booked"></div>
+                        <span>Booked</span>
+                    </div>
+                </div>
+
+                <div if:true={selectedSeats.length} class="booking-summary">
+                    <div class="selected-seats-info">
+                        <h4>Selected Seats ({selectedSeats.length})</h4>
+                        <div class="selected-seats-list">
+                            <template for:each={selectedSeats} for:item="seat">
+                                <span key={seat.id} class="selected-seat-tag">{seat.rowName}{seat.number}</span>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="price-summary">
+                        <div class="total-amount">
+                            <span>Total: ₹{totalAmount}</span>
+                        </div>
+                        <lightning-button 
+                            label="Pay Now" 
+                            variant="brand" 
+                            class="pay-button"
+                            onclick={handlePayment}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Confirmation -->
+            <div if:true={showBookingConfirmation} class="booking-confirmation">
+                <div class="confirmation-content">
+                    <div class="success-icon">
+                        <lightning-icon icon-name="utility:success" size="large" variant="success"></lightning-icon>
+                    </div>
+                    <h2>Booking Confirmed!</h2>
+                    <div class="booking-details">
+                        <h3>Booking ID: #{bookingId}</h3>
+                        <div class="booking-info">
+                            <p><strong>Movie:</strong> {selectedMovie.title}</p>
+                            <p><strong>Theater:</strong> {selectedTheater.name}</p>
+                            <p><strong>Date & Time:</strong> {selectedDate} at {selectedShowTime.time}</p>
+                            <p><strong>Seats:</strong> 
+                                <template for:each={selectedSeats} for:item="seat" for:index="index">
+                                    <span key={seat.id}>
+                                        {seat.rowName}{seat.number}<template if:false={seat.isLast}>, </template>
+                                    </span>
+                                </template>
+                            </p>
+                            <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
+                        </div>
+                    </div>
+                    <div class="confirmation-actions">
+                        <lightning-button 
+                            label="Download Ticket" 
+                            variant="brand" 
+                            onclick={handleDownloadTicket}>
+                        </lightning-button>
+                        <lightning-button 
+                            label="Book Another Movie" 
+                            variant="neutral" 
+                            onclick={handleBookAnother}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</template> 

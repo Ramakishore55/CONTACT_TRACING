@@ -1,0 +1,49 @@
+<template>
+    <div class="app">
+        <lightning-card title="Hi పద్మజ గారు" class="lightning-card">
+            <div>
+                <label for="mainQuestion">Do you like coffee?</label><br />
+                <lightning-radio-group
+                    name="mainQuestion"
+                    options={options}
+                    value={selectedValue}
+                    onchange={handleMainQuestionChange}>
+                </lightning-radio-group>
+            </div>
+    
+            <template if:true={showFollowUp}>
+                <div style="margin-top: 1rem;">
+                    <label for="coffeeType">విలైతే 4 మాటలు, కుదిరితే కప్ కాఫీ☕🙈</label><br />
+                    <lightning-radio-group
+                    name="followup1"
+                    options={options1}
+                    value={selectedValue}
+                    onchange={handleFollowUpChange}>
+                </lightning-radio-group>
+                </div>
+            </template>
+            <template if:true={showFollowUp1}>
+                <div style="margin-top: 1rem;">
+                    <label for="coffeeType">ఎక్కడ తాగుదాం🤷‍♂️</label><br />                    
+                    <lightning-radio-group
+                    name="followup2"
+                    options={options2}
+                    value={selectedValue}
+                    onchange={handleFollowUpChange1}>
+                </lightning-radio-group>
+                </div>
+            </template>
+            <template if:true={showFollowUp2}>
+                <div style="margin-top: 1rem;">
+                    <label for="coffeeType">మీరు నవ్వితే చాలా బాగుంటారు అండి👌</label><br />                    
+                    <lightning-radio-group
+                    name="followup3"
+                    options={options3}
+                    value={selectedValue}
+                    onchange={handleFollowUpChange2}>
+                </lightning-radio-group>
+                </div>
+            </template>
+        </lightning-card>                 
+    </div>
+</template>
