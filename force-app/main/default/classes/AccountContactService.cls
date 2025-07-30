@@ -7,6 +7,7 @@ public with sharing class AccountContactService {
             WHERE Active__c = TRUE AND AccountId IN :accountIds
             GROUP BY AccountId
         ];
+        //Adding coment to test Jenkins Job
         // build final list of accounts to update
         List<Account> accountsToUpdate = new List<Account>();
         for (AggregateResult result : results) {
