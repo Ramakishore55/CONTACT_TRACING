@@ -12,6 +12,7 @@ public with sharing class AccountContactService {
         // Test 3
        // Test 4
        // Test 5
+       //Test6
         // build final list of accounts to update
         List<Account> accountsToUpdate = new List<Account>();
         for (AggregateResult result : results) {
