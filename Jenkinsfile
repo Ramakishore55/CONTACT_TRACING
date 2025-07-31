@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-org/your-repo.git'
+                git branch: 'main', url: 'https://github.com/Ramakishore55/CONTACT_TRACING.git'
             }
         }
 
