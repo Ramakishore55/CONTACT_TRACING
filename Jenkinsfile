@@ -2,47 +2,52 @@ pipeline {
     agent any
 
     environment {
-        SF_USERNAME = credentials('SF_USERNAME') // From Jenkins credentials
-        SF_CONSUMER_KEY = credentials('SF_CONSUMER_KEY') // From Connected App
-        JWT_KEY_FILE = credentials('JWT_KEY_FILE') // server.key file
+        SFDX_CLI = 'C:\Users\asus\AppData\Roaming\npm\sfdx.cmd' // ⚠️ Change this path
+        AUTH_FILE = 'sfdx-auth.txt'
     }
 
     stages {
+        stage('Checkout SCM') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-org/your-repo.git'
+            }
+        }
+
         stage('Authenticate with Salesforce') {
             steps {
-                sh '''
-                sfdx auth:jwt:grant \
-                    --clientid $SF_CONSUMER_KEY \
-                    --jwtkeyfile $JWT_KEY_FILE \
-                    --username $SF_USERNAME \
-                    --instanceurl https://login.salesforce.com \
-                    --setalias DevOrg
-                '''
+                bat "\"${env.SFDX_CLI}\" auth:sfdxurl:store --sfdxurlfile ${env.AUTH_FILE} --setdefaultusername --setalias DevHub"
             }
         }
 
         stage('Validate Pull Request') {
             when {
-                expression { env.CHANGE_ID != null } // only runs on PRs
+                expression {
+                    return env.CHANGE_ID != null
+                }
             }
             steps {
-                sh '''
-                sfdx force:source:convert -d deploy_pkg
-                sfdx force:mdapi:deploy -u DevOrg -d deploy_pkg -c -w 10
-                '''
+                bat "\"${env.SFDX_CLI}\" force:source:deploy -c -p force-app --targetusername DevHub"
             }
         }
 
         stage('Deploy to Salesforce') {
             when {
-                branch 'main' // only runs when PR is merged to main
+                expression {
+                    return env.CHANGE_ID == null
+                }
             }
             steps {
-                sh '''
-                sfdx force:source:convert -d deploy_pkg
-                sfdx force:mdapi:deploy -u DevOrg -d deploy_pkg -w 10
-                '''
+                bat "\"${env.SFDX_CLI}\" force:source:deploy -p force-app --targetusername DevHub"
             }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline failed. Check logs above.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
         }
     }
 }
