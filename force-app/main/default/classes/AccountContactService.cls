@@ -8,6 +8,7 @@ public with sharing class AccountContactService {
             GROUP BY AccountId
         ];
         //Adding coment to test Jenkins Job
+        //Adding for Jenkins job Test2
         // build final list of accounts to update
         List<Account> accountsToUpdate = new List<Account>();
         for (AggregateResult result : results) {
